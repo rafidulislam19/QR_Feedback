@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+<!-- <!DOCTYPE html>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Custom Question Generator</title>
+     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+     <style>
+         .form-check {
+             margin-bottom: 10px;
+         }
+ 
+         .scoring-option {
+             display: flex;
+             justify-content: flex-start;
+             flex-wrap: wrap;
+             margin-bottom: 15px;
+         }
+ 
+         .scoring-option .form-check {
+             margin-right: 10px;
+             display: flex;
+             align-items: center;
+         }
+ 
+         .scoring-option .form-check-input {
+             display: none;
+         }
+ 
+         .scoring-option .form-check-label {
+             display: grid;
+             width: 60px;
+             height: 60px;
+             line-height: 60px;
+             text-align: center;
+             border-radius: 5px;
+             color: #000;
+             cursor: pointer;
+             border: 1px solid transparent;
+             transition: background-color 0.3s, border-color 0.3s;
+         }
+ 
+         .scoring-option .form-check-label.selected {
+             color: #fff;
+             border-color: #000;
+             border-width: 2px;
+             box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+         }
+     </style>
+ </head> -->
+
+ {% block content %}
+
+ <div class="container">
+
+     <form method="post" class="needs-validation" id="form" novalidate>
+        {% csrf_token %}
+        <input type="text" name="source" id="source" value="{{ id }}" hidden>
+        <div class="col-12 mb-2 form-element-address">
+            <div class="input-group">
+                <span class="input-group-text font-size-sm bg-white">
+                    <!-- <span class="material-symbols-outlined font-size-sm">ATM Name</span> -->
+                    ATM Name
+                </span>
+                <input required type="text" name="sourcename" id="sourcename" aria-label="sourcename"
+                    class="form-control border-end rounded-end font-size-sm bg-white" placeholder="{{name}}"
+                    disabled>
+
+            </div>
+        </div>
+        <div class="col-12 mb-2 form-element no-lr-pad">
+            <div class="input-group mb-4">
+                <span class="input-group-text font-size-sm"> আপনার মোবাইল নাম্বার </span>
+                <input type="text" name="contact" id="contact" aria-label="contact"
+                    class="form-control border-end rounded-end font-size-sm" placeholder="01xxxxxxxxx"
+                    maxlength="11" minlength="11">
+            </div>
+            <div class="error-container">
+                <span id="error-message" class="error-message"></span>
+            </div>
+        </div>
+         {% for field in form %}
+            <div class="col-12 mb-2 border rounded px-3 form-element">
+                <div class="form-group">
+                    <p>{{ field.label_tag }}</p>
+    
+                    {% if 'scoring-option' in field.field.widget.attrs.class %}
+                        <div class="scoring-option" data-question-id="{{ field.help_text }}" data-option-count="{{ field|length }}">
+                            
+                            {% for option in field %}
+                                <div class="form-check">
+                                    <label class="form-check-label"
+                                           data-value="{{ option.data.value }}"
+                                           for="{{ field.help_text }}">
+                                        {{ option.choice_label }}
+                                    </label>
+                                    <input type="radio" name="{{ field.help_text }}" value="{{ option.data.value }}" class="scoring-input" required>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                    <div class="radio-option" id="{{ field.help_text }}">
+                            
+                        {% for option in field %}
+                            <div>
+                                <label for="{{ field.help_text }}">
+                                    <input type="radio" name="{{ field.help_text }}" id = "{{ field.help_text }}" value="{{ option.choice_label }}" class="radio-option" required>
+                                    {{ option.choice_label }}
+                                </label>
+                                
+                            </div>
+                        {% endfor %}
+                        </div>
+
+                    {% endif %}
+    
+                    {% if field.errors %}
+                        <div class="alert alert-danger">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+         {% endfor %}
+         <div class="d-grid">
+            <button type="submit" class="btn btn-warning text-light mt-2">Submit</button>
+         </div>
+     </form>
+ </div>
+ <script>
+     document.addEventListener('DOMContentLoaded', function() {
+         document.querySelectorAll('.scoring-option').forEach(function(optionGroup) {
+             const optionCount = optionGroup.getAttribute('data-option-count');
+             const labels = optionGroup.querySelectorAll('.form-check-label');
+             
+             labels.forEach((label, index) => {
+                 const color = calculateColor(index, optionCount);
+                 label.style.backgroundColor = color;
+             });
+ 
+             optionGroup.addEventListener('click', function(event) {
+                 const target = event.target;
+                 if (target.classList.contains('form-check-label')) {
+                     optionGroup.querySelectorAll('.form-check-label').forEach(function(label) {
+                         label.classList.remove('selected');
+                     });
+                     target.classList.add('selected');
+                     const value = target.getAttribute('data-value');
+                     optionGroup.querySelector(`input[type="radio"][value="${value}"]`).checked = true;
+                 }
+             });
+         });
+ 
+         function calculateColor(index, total) {
+             const hueStart = 0; // Deep Red
+             const hueEnd = 120; // Deep Green
+             const hue = hueStart + (hueEnd - hueStart) * (index / (total - 1));
+             return `hsl(${hue}, 100%, 45%)`;
+         }
+     });
+ </script>
+
+
+{% endblock %}

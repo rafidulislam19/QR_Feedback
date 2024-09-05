@@ -1,0 +1,24 @@
+NAME="qrinsight"
+DJANGODIR=/var/www/qrinsight
+USER=appuser
+GROUP=appuser
+WORKERS=3
+BIND=unix:/var/www/qrinsight/core.sock
+DJANGO_SETTINGS_MODULE=core.settings
+DJANGO_WSGI_MODULE=core.wsgi
+LOGLEVEL=debug
+
+cd $DJANGODIR
+source venv/bin/activate
+
+export DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
+export PYTHONPATH=$DJANGODIR:$PYTHONPATH
+
+exec venv/bin/gunicorn ${DJANGO_WSGI_MODULE}:application \
+  --name $NAME \
+  --workers $WORKERS \
+  --user=$USER \
+  --group=$GROUP \
+  --bind=$BIND \
+  --log-level=$LOGLEVEL \
+  --log-file=-
